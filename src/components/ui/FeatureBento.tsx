@@ -372,7 +372,7 @@ const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-40px" },
-  transition: { duration: 0.55, delay, ease: "easeOut" as const },
+  transition: { duration: 0.55, delay, ease: [0.215, 0.61, 0.355, 1.0] },
 });
 
 export const FeatureBento = () => (
