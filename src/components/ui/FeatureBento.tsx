@@ -373,7 +373,7 @@ const fadeUp = (delay = 0) => ({
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-40px" },
   transition: { duration: 0.55, delay, ease: [0.215, 0.61, 0.355, 1.0] },
-});
+} as any);
 
 export const FeatureBento = () => (
   <section className="relative w-full max-w-6xl mx-auto px-4 z-10">
