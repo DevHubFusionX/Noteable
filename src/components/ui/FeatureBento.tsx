@@ -220,7 +220,7 @@ const SummarizerCard = () => {
               animate={{ backgroundColor: hovered && line.highlight ? "rgba(139,92,246,0.15)" : "rgba(0,0,0,0.06)" }}
               transition={{ delay: i * 0.1 }}
               className="h-2.5 rounded-full"
-              style={{ width: line.width }}
+              style={{ width: line.w }}
             />
           ))}
         </div>
