@@ -6,26 +6,8 @@
   --solid-purple: #7c3aed;
 }
 
-/* ── Dark theme (default) ── */
+/* ── Light theme (default) ── */
 :root,
-[data-theme="dark"] {
-  --bg:          #0a0a0a;
-  --bg-2:        #111111;
-  --bg-3:        #0d0d0d;
-  --border:      rgba(255,255,255,0.07);
-  --border-2:    rgba(255,255,255,0.12);
-  --text-1:      rgba(255,255,255,0.90);
-  --text-2:      rgba(255,255,255,0.60);
-  --text-3:      rgba(255,255,255,0.30);
-  --text-4:      rgba(255,255,255,0.15);
-  --surface:     rgba(255,255,255,0.04);
-  --surface-2:   rgba(255,255,255,0.07);
-  --glass-bg:    rgba(255,255,255,0.05);
-  --glass-border:rgba(255,255,255,0.10);
-  --glass-shadow:rgba(0,0,0,0.3);
-}
-
-/* ── Light theme ── */
 [data-theme="light"] {
   --bg:          #f0eff4;
   --bg-2:        #f7f6fa;
@@ -41,6 +23,24 @@
   --glass-bg:    rgba(255,255,255,0.55);
   --glass-border:rgba(0,0,0,0.08);
   --glass-shadow:rgba(0,0,0,0.08);
+}
+
+/* ── Dark theme ── */
+[data-theme="dark"] {
+  --bg:          #0a0a0a;
+  --bg-2:        #111111;
+  --bg-3:        #0d0d0d;
+  --border:      rgba(255,255,255,0.07);
+  --border-2:    rgba(255,255,255,0.12);
+  --text-1:      rgba(255,255,255,0.90);
+  --text-2:      rgba(255,255,255,0.60);
+  --text-3:      rgba(255,255,255,0.30);
+  --text-4:      rgba(255,255,255,0.15);
+  --surface:     rgba(255,255,255,0.04);
+  --surface-2:   rgba(255,255,255,0.07);
+  --glass-bg:    rgba(255,255,255,0.05);
+  --glass-border:rgba(255,255,255,0.10);
+  --glass-shadow:rgba(0,0,0,0.3);
 }
 
 /* ── System theme — defers to OS ── */

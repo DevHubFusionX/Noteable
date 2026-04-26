@@ -16,14 +16,14 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark", fontSize: "default", density: "comfortable",
+  theme: "light", fontSize: "default", density: "comfortable",
   setTheme: () => {}, setFontSize: () => {}, setDensity: () => {},
 });
 
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme,    setThemeState]    = useState<Theme>("dark");
+  const [theme,    setThemeState]    = useState<Theme>("light");
   const [fontSize, setFontSizeState] = useState<FontSize>("default");
   const [density,  setDensityState]  = useState<Density>("comfortable");
 

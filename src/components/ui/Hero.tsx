@@ -88,7 +88,7 @@ const HeroText = () => {
           x="0" y="90%"
           fontFamily="Mulish, sans-serif" fontWeight="900" fontSize="240" letterSpacing="-8"
           fill="none"
-          stroke="#e2e8f0"
+          stroke="var(--text-3)"
           strokeWidth="1.5"
         >
           NOTEABLE
@@ -138,7 +138,7 @@ const HeroText = () => {
         <motion.text
           x="0" y="90%"
           fontFamily="Mulish, sans-serif" fontWeight="900" fontSize="240" letterSpacing="-8"
-          fill="#0d0d12"
+          fill="var(--text-1)"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.3 }}

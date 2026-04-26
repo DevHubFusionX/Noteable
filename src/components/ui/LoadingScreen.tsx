@@ -30,7 +30,7 @@ export const LoadingScreen = () => {
           key="loader"
           exit={{ y: "-100%" }}
           transition={{ duration: 1.1, ease: [0.76, 0, 0.24, 1] }}
-          className="fixed inset-0 z-[9999] bg-[#050505] flex items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[9999] bg-background flex items-center justify-center overflow-hidden"
         >
           {/* ── Ruled lines drawing in ── */}
           <div className="absolute inset-0 pointer-events-none">
@@ -63,7 +63,7 @@ export const LoadingScreen = () => {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.35, delay: 0.2 + i * 0.08, ease: [0.34, 1.56, 0.64, 1] }}
-                className="w-4 h-4 rounded-full bg-[#050505] border border-white/10"
+                className="w-4 h-4 rounded-full bg-background border border-border"
               />
             ))}
           </div>
@@ -96,7 +96,7 @@ export const LoadingScreen = () => {
                     ease: [0.34, 1.56, 0.64, 1],
                   }}
                   className="text-[clamp(40px,10vw,96px)] font-bold tracking-tighter leading-none select-none"
-                  style={{ color: i % 2 === 0 ? "#ffffff" : "#8b5cf6" }}
+                  style={{ color: i % 2 === 0 ? "var(--text-1)" : "var(--main-color)" }}
                 >
                   {letter}
                 </motion.span>

@@ -134,11 +134,11 @@ export const Header = () => {
             transition={{ duration: 0.2 }}
             className="pointer-events-auto mt-2 w-[92%] max-w-5xl rounded-2xl overflow-hidden md:hidden"
             style={{
-              background: "rgba(10, 10, 10, 0.9)",
+              background: "var(--glass-bg)",
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
+              border: "1px solid var(--glass-border)",
+              boxShadow: "var(--glass-shadow)",
             }}
           >
             <div className="flex flex-col p-3 gap-1">
@@ -174,11 +174,11 @@ export const Header = () => {
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="pointer-events-auto mt-2 w-[92%] max-w-5xl rounded-2xl overflow-hidden"
             style={{
-              background: "rgba(10, 10, 10, 0.9)",
+              background: "var(--glass-bg)",
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
+              border: "1px solid var(--glass-border)",
+              boxShadow: "var(--glass-shadow)",
             }}
             onMouseEnter={() => setOpen(true)}
           >
@@ -226,7 +226,7 @@ export const Header = () => {
               {/* Right panel */}
               <div
                 className="p-7 flex flex-col justify-between"
-                style={{ borderLeft: "1px solid rgba(255, 255, 255, 0.08)", background: "transparent" }}
+                style={{ borderLeft: "1px solid var(--border)", background: "transparent" }}
               >
                 <div>
                   <div
