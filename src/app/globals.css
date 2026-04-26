@@ -1,26 +1,124 @@
 @import "tailwindcss";
 
+/* ── Base tokens ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --main-color: #8b5cf6;
+  --solid-purple: #7c3aed;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Dark theme (default) ── */
+:root,
+[data-theme="dark"] {
+  --bg:          #0a0a0a;
+  --bg-2:        #111111;
+  --bg-3:        #0d0d0d;
+  --border:      rgba(255,255,255,0.07);
+  --border-2:    rgba(255,255,255,0.12);
+  --text-1:      rgba(255,255,255,0.90);
+  --text-2:      rgba(255,255,255,0.60);
+  --text-3:      rgba(255,255,255,0.30);
+  --text-4:      rgba(255,255,255,0.15);
+  --surface:     rgba(255,255,255,0.04);
+  --surface-2:   rgba(255,255,255,0.07);
+  --glass-bg:    rgba(255,255,255,0.05);
+  --glass-border:rgba(255,255,255,0.10);
+  --glass-shadow:rgba(0,0,0,0.3);
 }
 
+/* ── Light theme ── */
+[data-theme="light"] {
+  --bg:          #f0eff4;
+  --bg-2:        #f7f6fa;
+  --bg-3:        #eae9ef;
+  --border:      rgba(0,0,0,0.07);
+  --border-2:    rgba(0,0,0,0.13);
+  --text-1:      rgba(0,0,0,0.88);
+  --text-2:      rgba(0,0,0,0.65);
+  --text-3:      rgba(0,0,0,0.45);
+  --text-4:      rgba(0,0,0,0.32);
+  --surface:     rgba(0,0,0,0.04);
+  --surface-2:   rgba(0,0,0,0.07);
+  --glass-bg:    rgba(255,255,255,0.55);
+  --glass-border:rgba(0,0,0,0.08);
+  --glass-shadow:rgba(0,0,0,0.08);
+}
+
+/* ── System theme — defers to OS ── */
+@media (prefers-color-scheme: light) {
+  [data-theme="system"] {
+    --bg:          #f0eff4;
+    --bg-2:        #f7f6fa;
+    --bg-3:        #eae9ef;
+    --border:      rgba(0,0,0,0.07);
+    --border-2:    rgba(0,0,0,0.13);
+    --text-1:      rgba(0,0,0,0.88);
+    --text-2:      rgba(0,0,0,0.65);
+    --text-3:      rgba(0,0,0,0.45);
+    --text-4:      rgba(0,0,0,0.32);
+    --surface:     rgba(0,0,0,0.04);
+    --surface-2:   rgba(0,0,0,0.07);
+    --glass-bg:    rgba(255,255,255,0.55);
+    --glass-border:rgba(0,0,0,0.08);
+    --glass-shadow:rgba(0,0,0,0.08);
+  }
+}
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  [data-theme="system"] {
+    --bg:          #0a0a0a;
+    --bg-2:        #111111;
+    --bg-3:        #0d0d0d;
+    --border:      rgba(255,255,255,0.07);
+    --border-2:    rgba(255,255,255,0.12);
+    --text-1:      rgba(255,255,255,0.90);
+    --text-2:      rgba(255,255,255,0.60);
+    --text-3:      rgba(255,255,255,0.30);
+    --text-4:      rgba(255,255,255,0.15);
+    --surface:     rgba(255,255,255,0.04);
+    --surface-2:   rgba(255,255,255,0.07);
+    --glass-bg:    rgba(255,255,255,0.05);
+    --glass-border:rgba(255,255,255,0.10);
+    --glass-shadow:rgba(0,0,0,0.3);
   }
 }
 
+/* ── Font size ── */
+html[data-fontsize="compact"]  { --fs-note: 11px; --fs-body: 12px; --fs-title: 13px; --fs-label: 9px;  }
+html[data-fontsize="default"]  { --fs-note: 12px; --fs-body: 13px; --fs-title: 14px; --fs-label: 10px; }
+html[data-fontsize="large"]    { --fs-note: 14px; --fs-body: 15px; --fs-title: 16px; --fs-label: 11px; }
+
+/* ── Card density ── */
+html[data-density="cozy"]        { --card-p: 12px; --card-gap: 10px; }
+html[data-density="comfortable"] { --card-p: 20px; --card-gap: 16px; }
+
+/* ── Apply font size tokens to common elements ── */
+html[data-fontsize] .note-title   { font-size: var(--fs-title); }
+html[data-fontsize] .note-preview { font-size: var(--fs-note);  }
+html[data-fontsize] .note-meta    { font-size: var(--fs-label); }
+html[data-fontsize] .note-body    { font-size: var(--fs-body);  }
+
+/* ── Apply density to note cards ── */
+html[data-density] .note-card  { padding: var(--card-p); }
+html[data-density] .notes-grid { gap: var(--card-gap); }
+
+/* ── Tailwind theme bridge ── */
+@theme inline {
+  --color-background: var(--bg);
+  --color-bg-2:       var(--bg-2);
+  --color-bg-3:       var(--bg-3);
+  --color-border:     var(--border);
+  --color-text-1:     var(--text-1);
+  --color-text-2:     var(--text-2);
+  --color-text-3:     var(--text-3);
+  --color-main:       var(--main-color);
+  --color-purple-solid: var(--solid-purple);
+  --font-sans:        var(--font-mulish);
+  --font-mono:        var(--font-geist-mono);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: Mulish, sans-serif;
+  overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
 }
