@@ -134,9 +134,11 @@ export const Header = () => {
             transition={{ duration: 0.2 }}
             className="pointer-events-auto mt-2 w-[92%] max-w-5xl rounded-2xl overflow-hidden md:hidden"
             style={{
-              background: "var(--lp-surface)",
-              border: "1px solid var(--lp-border-2)",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.2)",
+              background: "rgba(10, 10, 10, 0.9)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
             }}
           >
             <div className="flex flex-col p-3 gap-1">
@@ -172,9 +174,11 @@ export const Header = () => {
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="pointer-events-auto mt-2 w-[92%] max-w-5xl rounded-2xl overflow-hidden"
             style={{
-              background: "var(--lp-surface)",
-              border: "1px solid var(--lp-border-2)",
-              boxShadow: "0 16px 48px rgba(0,0,0,0.2)",
+              background: "rgba(10, 10, 10, 0.9)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
             }}
             onMouseEnter={() => setOpen(true)}
           >
@@ -188,7 +192,7 @@ export const Header = () => {
 
             <div className="relative grid grid-cols-[1fr_280px]">
               {/* Features grid */}
-              <div className="p-7" style={{ background: "var(--lp-surface-2)" }}>
+              <div className="p-7" style={{ background: "transparent" }}>
                 <p className="text-[10px] font-mono uppercase tracking-[0.22em] mb-5" style={{ color: "var(--lp-text-3)" }}>
                   Product Capabilities
                 </p>
@@ -222,7 +226,7 @@ export const Header = () => {
               {/* Right panel */}
               <div
                 className="p-7 flex flex-col justify-between"
-                style={{ borderLeft: "1px solid var(--lp-border)", background: "var(--lp-surface-2)" }}
+                style={{ borderLeft: "1px solid rgba(255, 255, 255, 0.08)", background: "transparent" }}
               >
                 <div>
                   <div
