@@ -167,7 +167,7 @@ export const TranscribeResponseSchema = z.object({
 export const ApiErrorSchema = z.object({
   message:    z.string(),
   statusCode: z.number().optional(),
-  errors:     z.record(z.string()).optional(),
+  errors:     z.record(z.string(), z.string()).optional(),
 });
 
 // ── Inferred types ─────────────────────────────────────────────────────────

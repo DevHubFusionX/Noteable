@@ -123,9 +123,14 @@ export const ForgotPasswordModal = ({ open, onClose, onBack }: ForgotPasswordMod
                   <motion.div
                     key={step}
                     custom={direction.current}
-                    initial={(d: number) => ({ rotateY: d * 90, opacity: 0 })}
-                    animate={{ rotateY: 0, opacity: 1 }}
-                    exit={(d: number) => ({ rotateY: d * -90, opacity: 0 })}
+                    variants={{
+                      enter: (d: number) => ({ rotateY: d * 90, opacity: 0 }),
+                      center: { rotateY: 0, opacity: 1 },
+                      exit: (d: number) => ({ rotateY: d * -90, opacity: 0 }),
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
                     transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                     style={{ transformOrigin: "center center", backfaceVisibility: "hidden" }}
                     className="relative bg-white"
