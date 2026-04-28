@@ -359,7 +359,7 @@ function NoteEditorContent() {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden relative" style={{ background: "var(--bg)" }}>
+    <div className="flex flex-col h-full min-h-[100dvh] md:min-h-0 overflow-hidden relative" style={{ background: "var(--bg)" }}>
       {loadingNote && (
         <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm">
           <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
@@ -375,7 +375,7 @@ function NoteEditorContent() {
       </div>
 
       {/* Top bar */}
-      <div className="relative z-20 shrink-0 px-3 h-14 flex items-center gap-2"
+      <div className="relative z-20 shrink-0 px-3 h-12 sm:h-14 flex items-center gap-2"
         style={{ borderBottom: "1px solid var(--border)" }}>
 
         {/* Back + save */}
@@ -458,7 +458,7 @@ function NoteEditorContent() {
       </div>
 
       {/* Toolbar */}
-      <div className="relative z-10 flex justify-center pt-4 px-4 shrink-0 overflow-x-auto scrollbar-none">
+      <div className="relative z-10 flex justify-center pt-3 px-3 sm:pt-4 sm:px-4 shrink-0 overflow-x-auto scrollbar-none">
         <Glass className="flex items-center gap-1 px-3 py-2 rounded-2xl min-w-max">
           {TOOLBAR.map((group, gi) => (
             <React.Fragment key={gi}>
@@ -507,8 +507,8 @@ function NoteEditorContent() {
       </AnimatePresence>
 
       {/* Editor */}
-      <div className="flex-1 overflow-y-auto scrollbar-none">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-4">
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-8 flex flex-col gap-3 sm:gap-4">
           <textarea ref={titleRef} value={title} onChange={e => setTitle(e.target.value)}
             placeholder="Untitled" rows={1}
             className="w-full resize-none bg-transparent font-black tracking-tight leading-tight focus:outline-none overflow-hidden"
@@ -521,7 +521,7 @@ function NoteEditorContent() {
               suppressContentEditableWarning
               onInput={handleContentInput}
               data-placeholder="Start writing…"
-              className="min-h-[50vh] leading-relaxed focus:outline-none note-editor"
+              className="min-h-[40dvh] sm:min-h-[50vh] leading-relaxed focus:outline-none note-editor"
               style={{ fontSize: "var(--fs-body, 15px)", color: "var(--text-2)", fontFamily: "Mulish, sans-serif" }}
             />
             {interim && (
@@ -534,7 +534,7 @@ function NoteEditorContent() {
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 shrink-0 px-3 sm:px-4 h-14 flex items-center justify-between gap-3"
+      <div className="relative z-10 shrink-0 px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between gap-3"
         style={{ borderTop: "1px solid var(--border)" }}>
         <div className="flex items-center gap-3 text-[11px] font-mono" style={{ color: "var(--text-4)" }}>
           <div className="flex items-center gap-1.5">

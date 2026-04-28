@@ -122,6 +122,14 @@ body {
   overflow-x: hidden;
 }
 
+/* ── Hide scrollbars globally ── */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Landing page variables ── */
 :root,
 [data-theme="light"] {
