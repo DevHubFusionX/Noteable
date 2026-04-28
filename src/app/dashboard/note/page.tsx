@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import {
   ArrowLeft, Bold, Italic, List, ListOrdered,
   Hash, FolderOpen, Clock, Sparkles, Mic,
@@ -229,7 +230,7 @@ function NoteEditorContent() {
       lastSavedTitle.current   = existingNote.title;
       lastSavedContent.current = existingNote.content;
       if (contentRef.current)
-        contentRef.current.innerHTML = existingNote.content;
+        contentRef.current.innerHTML = DOMPurify.sanitize(existingNote.content);
       if (existingNote.groupId) {
         const g = groups.find(x => x.id === existingNote.groupId);
         if (g) setGroup(g);
@@ -256,7 +257,22 @@ function NoteEditorContent() {
   // Extract plain markdown from the contentEditable div's innerText
   const handleContentInput = () => {
     if (!contentRef.current) return;
-    // Just store the raw text for saving — don't re-render HTML on every keystroke
+    // Sanitize innerHTML on every input to prevent XSS from pasted content
+    const raw = contentRef.current.innerHTML;
+    const clean = DOMPurify.sanitize(raw, {
+      ALLOWED_TAGS: ["b", "strong", "i", "em", "u", "h1", "h2", "h3", "p", "br",
+                     "ul", "ol", "li", "blockquote", "pre", "code", "span", "div"],
+      ALLOWED_ATTR: [],
+    });
+    if (clean !== raw) {
+      // Restore cursor to end after sanitization
+      contentRef.current.innerHTML = clean;
+      const range = document.createRange();
+      range.selectNodeContents(contentRef.current);
+      range.collapse(false);
+      window.getSelection()?.removeAllRanges();
+      window.getSelection()?.addRange(range);
+    }
     setContent(contentRef.current.innerText);
   };
 
@@ -273,7 +289,7 @@ function NoteEditorContent() {
 
     setSaved(false);
     const t = setTimeout(() => {
-      const savedContent = contentRef.current?.innerHTML ?? content;
+      const savedContent = DOMPurify.sanitize(contentRef.current?.innerHTML ?? content);
       updateNote.mutate(
         { id: noteId, payload: { title: title.trim(), content: savedContent, groupId: group.id === "none" ? undefined : group.id } },
         { onSuccess: () => {
@@ -307,24 +323,27 @@ function NoteEditorContent() {
 
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
+  const ALLOWED_FORMATS: Record<string, () => void> = {
+    bold:    () => document.execCommand("bold"),
+    italic:  () => document.execCommand("italic"),
+    heading: () => document.execCommand("formatBlock", false, "h2"),
+    quote:   () => document.execCommand("formatBlock", false, "blockquote"),
+    ul:      () => document.execCommand("insertUnorderedList"),
+    ol:      () => document.execCommand("insertOrderedList"),
+  };
+
   const handleFormat = (key: string) => {
     if (!contentRef.current) return;
+    const cmd = ALLOWED_FORMATS[key];
+    if (!cmd) return; // reject anything not in the allowlist
     contentRef.current.focus();
-
-    switch (key) {
-      case "bold":    document.execCommand("bold");                    break;
-      case "italic":  document.execCommand("italic");                  break;
-      case "heading": document.execCommand("formatBlock", false, "h2"); break;
-      case "quote":   document.execCommand("formatBlock", false, "blockquote"); break;
-      case "ul":      document.execCommand("insertUnorderedList");     break;
-      case "ol":      document.execCommand("insertOrderedList");       break;
-    }
+    cmd();
     setContent(contentRef.current.innerHTML);
   };
 
   const handleSave = () => {
     if (!title.trim()) return;
-    const savedContent = contentRef.current?.innerHTML ?? content;
+    const savedContent = DOMPurify.sanitize(contentRef.current?.innerHTML ?? content);
     const payload = {
       title:      title.trim(),
       content:    savedContent,

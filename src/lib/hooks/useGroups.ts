@@ -8,7 +8,7 @@ export const useGroups = (params: FetchGroupsParams = {}) =>
   useQuery({
     queryKey:  queryKeys.groups.list(params),
     queryFn:   () => groupsApi.fetchAll(params),
-    staleTime: 60_000,
+    staleTime: 10 * 60_000,
   });
 
 export const useGroup = (id: string | null) =>
@@ -16,7 +16,7 @@ export const useGroup = (id: string | null) =>
     queryKey:  queryKeys.groups.detail(id ?? ""),
     queryFn:   () => groupsApi.fetchOne(id!),
     enabled:   !!id,
-    staleTime: 60_000,
+    staleTime: 10 * 60_000,
   });
 
 export const useCreateGroup = () => {

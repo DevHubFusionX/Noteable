@@ -11,8 +11,10 @@
   "dependencies": {
     "@tanstack/react-query": "^5.100.1",
     "@tanstack/react-query-devtools": "^5.100.1",
+    "@types/dompurify": "^3.0.5",
     "@types/react-speech-recognition": "^3.9.6",
     "axios": "^1.15.2",
+    "dompurify": "^3.4.1",
     "framer-motion": "^12.38.0",
     "gsap": "^3.15.0",
     "lucide-react": "^1.8.0",

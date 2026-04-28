@@ -67,7 +67,7 @@ export const AuthModal = ({ open, onClose }: AuthModalProps) => {
                 </button>
 
                 {/* 2-col on sm+, single col on mobile */}
-                <div className="flex rounded-2xl overflow-hidden border border-slate-200 shadow-[0_24px_80px_rgba(0,0,0,0.16)]">
+                <div className="flex items-stretch rounded-2xl overflow-hidden border border-slate-200 shadow-[0_24px_80px_rgba(0,0,0,0.16)]">
                   <div className="hidden sm:block">
                     <AuthLeftPanel tab={form.tab} />
                   </div>

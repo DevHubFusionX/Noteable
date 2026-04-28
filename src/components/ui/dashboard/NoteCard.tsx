@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { FileText, MoreHorizontal, Pin, Archive, Clock, Trash2, Eye, X, Edit3 } from "lucide-react";
+import DOMPurify from "dompurify";
 import { NoteMenu } from "./NoteMenu";
 import { useNotesStore } from "@/lib/stores/notesStore";
 import { useMoveToTrash, useToggleArchive } from "@/lib/hooks";
@@ -71,7 +72,7 @@ const NotePreviewModal = ({ note, onClose, onEdit }: { note: Note; onClose: () =
           <div
             className="note-editor leading-relaxed"
             style={{ fontSize: "15px", color: "var(--text-2)", fontFamily: "Mulish, sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: note.content || "<p style='color:var(--text-4)'>No content</p>" }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content || "<p style='color:var(--text-4)'>No content</p>") }}
           />
         </div>
       </motion.div>

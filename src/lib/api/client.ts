@@ -53,7 +53,11 @@ const createClient = (): AxiosInstance => {
         window.dispatchEvent(new CustomEvent("noteable:unauthorized"));
       }
 
-      console.error(`API Error [${status}]:`, message, err.response?.data);
+      if (process.env.NODE_ENV === "development") {
+        // Sanitize status to a safe integer before logging to prevent log injection
+        const safeStatus = Number.isInteger(status) && status >= 100 && status <= 599 ? status : "unknown";
+        console.error(`API Error [${safeStatus}]`);
+      }
       return Promise.reject(new ApiClientError(message, status, errors));
     },
   );

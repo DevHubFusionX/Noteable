@@ -14,7 +14,7 @@ export const AuthLeftPanel = ({ tab }: { tab: AuthTab }) => {
   }, []);
 
   return (
-    <div className="relative w-[260px] shrink-0 bg-slate-900 rounded-l-2xl overflow-hidden flex flex-col justify-between p-8">
+    <div className="relative w-[220px] md:w-[280px] shrink-0 bg-slate-900 rounded-l-2xl overflow-hidden flex flex-col justify-between p-6 md:p-8 self-stretch min-h-full">
       {/* Ruled lines */}
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(16)].map((_, i) => (
@@ -28,11 +28,11 @@ export const AuthLeftPanel = ({ tab }: { tab: AuthTab }) => {
 
       {/* Logo + heading */}
       <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-10">
+        <div className="flex items-center gap-2 mb-6 md:mb-10">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M12 2L12 22M2 12L22 12M4.93 4.93L19.07 19.07M19.07 4.93L4.93 19.07" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-          <span className="font-bold text-[15px] tracking-tight text-white">Noteable</span>
+          <span className="font-bold text-[14px] md:text-[15px] tracking-tight text-white">Noteable</span>
         </div>
 
         <AnimatePresence mode="wait">
@@ -43,10 +43,10 @@ export const AuthLeftPanel = ({ tab }: { tab: AuthTab }) => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
           >
-            <h3 className="text-white font-serif italic text-[24px] font-bold leading-tight mb-3">
+            <h3 className="text-white font-serif italic text-[18px] md:text-[24px] font-bold leading-tight mb-2 md:mb-3">
               {tab === "signup" ? "Start thinking privately." : "Welcome back."}
             </h3>
-            <p className="text-white/35 text-[12px] leading-relaxed">
+            <p className="text-white/35 text-[11px] md:text-[12px] leading-relaxed">
               {tab === "signup" ? "Your notes, your device, your rules." : "Your thoughts are waiting for you."}
             </p>
           </motion.div>

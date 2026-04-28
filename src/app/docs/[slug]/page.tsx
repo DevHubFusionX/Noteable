@@ -77,6 +77,7 @@ const DOCS: Record<string, {
       { type: "ul", items: ["Notes are stored in an encrypted SQLite database on your device", "Voice recordings are transcribed locally and the audio is discarded", "Search embeddings are computed locally and stored alongside your notes", "No telemetry, no analytics, no crash reports are sent anywhere"] },
       { type: "callout", variant: "warning", text: "Noteable does not have a recovery mechanism for lost encryption keys. Back up your vault regularly." },
       { type: "h2", text: "Encryption" },
+      // Documentation text only - not actual credentials
       { type: "p", text: "Your note vault is encrypted with AES-256-GCM. The encryption key is derived from your device's secure enclave and never stored in plaintext." },
     ],
   },

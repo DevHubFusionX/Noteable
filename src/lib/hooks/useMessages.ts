@@ -7,7 +7,7 @@ export const useMessages = (noteId: string | null, page = 1) =>
     queryKey:  queryKeys.messages.byNote(noteId ?? "", page),
     queryFn:   () => messagesApi.fetchByNote(noteId!, page),
     enabled:   !!noteId,
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
   });
 
 export const useSendMessage = (noteId: string | null) => {

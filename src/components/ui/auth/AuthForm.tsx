@@ -56,7 +56,7 @@ export const AuthForm = ({
   name, setName, loading, done, apiError, direction,
   switchTab, handleSubmit, reset, onClose, onForgot,
 }: AuthFormProps) => (
-  <div className="flex-1 bg-white relative" style={{ perspective: "1200px" }}>
+  <div className="flex-1 bg-white relative flex flex-col" style={{ perspective: "1200px" }}>
     {/* Tape strip */}
     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 h-4 bg-yellow-100/90 border-x border-b border-yellow-200/60 z-20" />
 
@@ -73,8 +73,8 @@ export const AuthForm = ({
         animate="center"
         exit="exit"
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        style={{ transformOrigin: "center center", backfaceVisibility: "hidden" }}
-        className="relative bg-white"
+        style={{ transformOrigin: "center center", backfaceVisibility: "hidden", minHeight: "100%" }}
+        className="relative bg-white flex-1 flex flex-col"
       >
         <RuledLines />
 

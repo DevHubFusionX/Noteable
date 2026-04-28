@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -8,8 +8,8 @@ const makeQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime:            30_000,
-        gcTime:               5 * 60 * 1000,
+        staleTime:            5 * 60_000,
+        gcTime:               10 * 60_000,
         retry:                1,
         refetchOnWindowFocus: false,
       },
@@ -19,9 +19,17 @@ const makeQueryClient = () =>
     },
   });
 
+// Ping the API on load to wake up Render free-tier cold start
+const pingApi = () => {
+  const url = process.env.NEXT_PUBLIC_API_URL;
+  if (!url) return;
+  fetch(`${url}/health`, { method: "GET", cache: "no-store" }).catch(() => {});
+};
+
 export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
-  // useState ensures the client is not recreated on every render
   const [queryClient] = useState(makeQueryClient);
+
+  useEffect(() => { pingApi(); }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

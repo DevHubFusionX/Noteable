@@ -7,14 +7,14 @@ export const useArchivedNotes = (params: FetchArchivedParams = {}) =>
   useQuery({
     queryKey:  queryKeys.notes.archived(params),
     queryFn:   () => notesApi.fetchArchived(params),
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
   });
 
 export const usePinnedNotes = (params: FetchPinnedParams = {}) =>
   useQuery({
     queryKey:  queryKeys.notes.pinned(params),
     queryFn:   () => notesApi.fetchPinned(params),
-    staleTime: 30_000,
+    staleTime: 5 * 60_000,
   });
 
 export const useDeleteNotes = () => {
