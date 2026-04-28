@@ -78,7 +78,7 @@ export const AuthForm = ({
       >
         <RuledLines />
 
-        <div className="relative z-10 p-10">
+        <div className="relative z-10 p-6 sm:p-10">
           {done ? (
             <SuccessState tab={tab} onClose={() => { reset(); onClose(); }} />
           ) : (
