@@ -6,6 +6,7 @@ import { FileText, Pin } from "lucide-react";
 import { useTogglePin } from "@/lib/hooks";
 import { useNotesStore } from "@/lib/stores/notesStore";
 import { timeAgo } from "@/lib/utils/timeAgo";
+import { stripMarkdown } from "@/lib/utils/stripMarkdown";
 import { Note } from "@/lib/api/types";
 
 interface NoteRowProps {
@@ -40,7 +41,7 @@ export const NoteRow = ({ note, index }: NoteRowProps) => {
       </p>
 
       <p className="text-[12px] flex-1 truncate hidden md:block" style={{ color: "var(--text-3)" }}>
-        {note.content}
+        {stripMarkdown(note.content)}
       </p>
 
       <div className="flex items-center gap-3 shrink-0">

@@ -120,5 +120,81 @@ body {
   color: var(--text-1);
   font-family: Mulish, sans-serif;
   overflow-x: hidden;
-  transition: background 0.3s ease, color 0.3s ease;
 }
+
+/* ── Landing page variables ── */
+:root,
+[data-theme="light"] {
+  --lp-bg:       #f7f6fa;
+  --lp-bg-2:     #f0eff4;
+  --lp-surface:  #ffffff;
+  --lp-text-1:   rgba(0,0,0,0.88);
+  --lp-text-2:   rgba(0,0,0,0.55);
+  --lp-text-3:   rgba(0,0,0,0.35);
+  --lp-border:   rgba(0,0,0,0.07);
+  --lp-border-2: rgba(0,0,0,0.10);
+  --lp-ruled:    rgba(0,0,0,0.04);
+  --lp-margin:   rgba(220,50,50,0.2);
+}
+
+/* ── Background grid CSS animations (replaces GSAP) ── */
+@keyframes grid-pan {
+  to { background-position: 64px 64px; }
+}
+.grid-pan {
+  animation: grid-pan 4s linear infinite;
+  will-change: background-position;
+}
+
+@keyframes node-travel {
+  0%   { transform: translate(0, 0);      opacity: 0; }
+  10%  { opacity: 1; }
+  50%  { transform: translate(192px, 128px); opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translate(384px, 0);   opacity: 0; }
+}
+.smart-node {
+  animation: node-travel 6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* ── Ticker CSS animation (replaces framer-motion) ── */
+@keyframes ticker-scroll {
+  to { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker-scroll 18s linear infinite;
+  will-change: transform;
+}
+
+/* ── Markdown preview ──────────────────────────────────────────────────────── */
+.markdown-preview h1,.markdown-preview h2,.markdown-preview h3 { color: var(--text-1); font-weight: 800; margin: 1.2em 0 0.4em; line-height: 1.3; }
+.markdown-preview h1 { font-size: 1.6em; }
+.markdown-preview h2 { font-size: 1.3em; }
+.markdown-preview h3 { font-size: 1.1em; }
+.markdown-preview p  { margin: 0.6em 0; }
+.markdown-preview strong { color: var(--text-1); font-weight: 700; }
+.markdown-preview em     { font-style: italic; color: var(--text-2); }
+.markdown-preview blockquote { border-left: 3px solid var(--border-2); padding-left: 1em; margin: 0.8em 0; color: var(--text-3); font-style: italic; }
+.markdown-preview ul { list-style: disc; padding-left: 1.4em; margin: 0.6em 0; }
+.markdown-preview ol { list-style: decimal; padding-left: 1.4em; margin: 0.6em 0; }
+.markdown-preview li { margin: 0.25em 0; }
+.markdown-preview code { background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 0.1em 0.4em; font-size: 0.88em; font-family: monospace; color: #a78bfa; }
+.markdown-preview pre  { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1em; overflow-x: auto; margin: 0.8em 0; }
+.markdown-preview pre code { background: none; border: none; padding: 0; }
+.markdown-preview a  { color: #8b5cf6; text-decoration: underline; }
+.markdown-preview hr { border-color: var(--border); margin: 1.2em 0; }
+
+/* ── Rich text editor (contentEditable) ───────────────────────────────────── */
+.note-editor h1,.note-editor h2,.note-editor h3 { color: var(--text-1); font-weight: 800; margin: 0.8em 0 0.3em; line-height: 1.3; }
+.note-editor h1 { font-size: 1.6em; }
+.note-editor h2 { font-size: 1.3em; }
+.note-editor h3 { font-size: 1.1em; }
+.note-editor b, .note-editor strong { color: var(--text-1); font-weight: 700; }
+.note-editor i, .note-editor em     { font-style: italic; }
+.note-editor blockquote { border-left: 3px solid var(--border-2); padding-left: 1em; margin: 0.6em 0; color: var(--text-3); font-style: italic; }
+.note-editor ul { list-style: disc;    padding-left: 1.4em; margin: 0.4em 0; }
+.note-editor ol { list-style: decimal; padding-left: 1.4em; margin: 0.4em 0; }
+.note-editor li { margin: 0.2em 0; }
+.note-editor a  { color: #8b5cf6; text-decoration: underline; }
+.note-editor:empty:before { content: attr(data-placeholder); color: var(--text-4); pointer-events: none; }

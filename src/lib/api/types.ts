@@ -102,7 +102,9 @@ export const CreateNotePayloadSchema = z.object({
   groupId:    z.string().optional().nullable(),
 });
 
-export const UpdateNotePayloadSchema = CreateNotePayloadSchema.partial();
+export const UpdateNotePayloadSchema = CreateNotePayloadSchema.partial().extend({
+  isDeleted: z.boolean().optional(),
+});
 
 // List response — API returns array directly inside data wrapper
 export const NotesListResponseSchema = z.any().transform((val) => {
@@ -129,7 +131,13 @@ export const CreateGroupPayloadSchema = z.object({
 
 export const UpdateGroupPayloadSchema = CreateGroupPayloadSchema.partial();
 
-export const GroupsListResponseSchema = z.array(GroupSchema);
+export const GroupsListResponseSchema = z.any().transform((val) => {
+  if (Array.isArray(val)) return val;
+  if (val && typeof val === "object") {
+    return val.records ?? val.groups ?? val.data ?? val.items ?? [];
+  }
+  return [];
+}).pipe(z.array(GroupSchema));
 
 // ── Messages ───────────────────────────────────────────────────────────────
 

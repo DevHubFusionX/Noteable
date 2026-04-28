@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Check, Edit3, FileText, Mic, Sparkles, Zap, Shield, Bell } from "lucide-react";
 import { TopBar } from "@/components/ui/dashboard/TopBar";
+import { useAuthStore } from "@/lib/stores/authStore";
 
-const Avatar = () => {
+const Avatar = ({ initials }: { initials: string }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <div className="relative w-20 h-20 shrink-0 cursor-pointer"
@@ -16,7 +17,7 @@ const Avatar = () => {
         <div className="w-full h-full rounded-2xl" style={{ background: "var(--bg)" }} />
       </motion.div>
       <div className="absolute inset-[2px] rounded-2xl flex items-center justify-center text-[28px] font-black"
-        style={{ background: "var(--bg-2)", border: "1px solid var(--border)", color: "var(--text-1)" }}>N</div>
+        style={{ background: "var(--bg-2)", border: "1px solid var(--border)", color: "var(--text-1)" }}>{initials}</div>
       <AnimatePresence>
         {hovered && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -31,11 +32,19 @@ const Avatar = () => {
   );
 };
 
-const EditableField = ({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) => {
+const EditableField = ({ label, value, mono = false, onSave }: { label: string; value: string; mono?: boolean; onSave?: (val: string) => Promise<void> }) => {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(value);
   const [saved, setSaved] = useState(false);
-  const save = () => { setEditing(false); setSaved(true); setTimeout(() => setSaved(false), 2000); };
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    if (onSave && val !== value) {
+      setSaving(true);
+      try { await onSave(val); } catch { setVal(value); }
+      setSaving(false);
+    }
+    setEditing(false); setSaved(true); setTimeout(() => setSaved(false), 2000);
+  };
   return (
     <div className="flex flex-col gap-1.5">
       <p className="text-[9px] font-mono uppercase tracking-[0.22em]" style={{ color: "var(--text-4)" }}>{label}</p>
@@ -48,6 +57,7 @@ const EditableField = ({ label, value, mono = false }: { label: string; value: s
           : <span className={`flex-1 text-[13px] ${mono ? "font-mono" : "font-medium"}`} style={{ color: "var(--text-2)" }}>{val}</span>
         }
         <motion.button onClick={() => editing ? save() : setEditing(true)} whileTap={{ scale: 0.9 }}
+          disabled={saving}
           className="shrink-0 transition-colors" style={{ color: "var(--text-4)" }}>
           <AnimatePresence mode="wait">
             {saved ? <motion.div key="c" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}><Check className="w-3.5 h-3.5 text-emerald-400" /></motion.div>
@@ -175,6 +185,17 @@ const DangerZone = () => {
 };
 
 export default function ProfilePage() {
+  const user     = useAuthStore(s => s.user);
+  const updateMe = useAuthStore(s => s.updateMe);
+
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).getFullYear()
+    : "—";
+
+  const initials = user?.name
+    ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
+    : "?";
+
   return (
     <div className="flex flex-col h-full overflow-hidden" style={{ background: "var(--bg)" }}>
       <TopBar view="grid" setView={() => {}} onNewNote={() => {}} />
@@ -185,14 +206,14 @@ export default function ProfilePage() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
             className="flex items-center gap-5 p-5 rounded-2xl"
             style={{ background: "var(--bg-2)", border: "1px solid var(--border)" }}>
-            <Avatar />
+            <Avatar initials={initials} />
             <div className="flex-1 min-w-0">
-              <h1 className="text-[22px] font-black tracking-tight leading-none" style={{ color: "var(--text-1)" }}>Noteable User</h1>
-              <p className="text-[12px] font-mono mt-1" style={{ color: "var(--text-3)" }}>user@noteable.app</p>
+              <h1 className="text-[22px] font-black tracking-tight leading-none" style={{ color: "var(--text-1)" }}>{user?.name ?? "—"}</h1>
+              <p className="text-[12px] font-mono mt-1" style={{ color: "var(--text-3)" }}>{user?.email ?? "—"}</p>
               <div className="flex items-center gap-2 mt-3">
                 <span className="text-[9px] font-mono uppercase tracking-[0.2em] rounded-full px-2.5 py-1"
                   style={{ color: "var(--text-3)", background: "var(--surface)", border: "1px solid var(--border)" }}>
-                  Member since 2024
+                  Member since {memberSince}
                 </span>
                 <span className="flex items-center gap-1 text-[9px] font-mono uppercase tracking-[0.2em] text-emerald-400/80 bg-emerald-500/[0.08] border border-emerald-500/20 rounded-full px-2.5 py-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" /> Active
@@ -208,8 +229,8 @@ export default function ProfilePage() {
                 className="p-5 rounded-2xl flex flex-col gap-4"
                 style={{ background: "var(--bg-2)", border: "1px solid var(--border)" }}>
                 <p className="text-[9px] font-mono uppercase tracking-[0.22em]" style={{ color: "var(--text-4)" }}>Profile</p>
-                <EditableField label="Display name" value="Noteable User" />
-                <EditableField label="Email" value="user@noteable.app" mono />
+                <EditableField label="Display name" value={user?.name ?? ""} onSave={val => updateMe({ name: val })} />
+                <EditableField label="Email" value={user?.email ?? ""} mono onSave={val => updateMe({ email: val })} />
                 <EditableField label="Bio" value="Building in public. Notes are my second brain." />
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.35 }} className="flex flex-col gap-3">

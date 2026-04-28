@@ -30,23 +30,19 @@ const testimonials = [
   },
 ];
 
-/* ── Infinite ticker ── */
+/* ── Infinite ticker — CSS-only for zero React overhead ── */
 const Ticker = () => {
   const items = ["Note Buddy", "Voice Capture", "On-Device AI", "Smart Summaries", "Auto-Linking", "Private by Design"];
   return (
     <div className="relative overflow-hidden border-y border-white/[0.06] py-3 mb-20">
-      <motion.div
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-        className="flex gap-0 whitespace-nowrap"
-      >
+      <div className="ticker-track flex gap-0 whitespace-nowrap">
         {[...items, ...items].map((item, i) => (
           <span key={i} className="flex items-center gap-4 px-6 text-[11px] font-mono uppercase tracking-[0.25em] text-white/25">
             {item}
             <span className="w-1 h-1 rounded-full bg-white/20 inline-block" />
           </span>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -61,15 +57,11 @@ const HeroCard = ({ t }: { t: typeof testimonials[0] }) => {
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className="relative col-span-1 lg:col-span-7 bg-[#1e0f4e] border border-white/[0.1] rounded-2xl p-10 md:p-14 overflow-hidden group"
     >
-      {/* Ruled lines */}
-      {[...Array(8)].map((_, i) => (
-        <motion.div
+      {/* Ruled lines — static divs instead of animated (3% opacity doesn't need animation) */}
+      {[...Array(4)].map((_, i) => (
+        <div
           key={i}
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
-          style={{ top: `${60 + i * 44}px`, originX: 0 }}
+          style={{ top: `${60 + i * 80}px` }}
           className="absolute left-0 right-0 h-px bg-white/[0.03]"
         />
       ))}
@@ -87,7 +79,7 @@ const HeroCard = ({ t }: { t: typeof testimonials[0] }) => {
       </motion.div>
 
       {/* Accent glow */}
-      <div className="absolute -bottom-20 -left-20 w-60 h-60 rounded-full blur-[80px] pointer-events-none transition-opacity duration-700"
+      <div className="absolute -bottom-20 -left-20 w-60 h-60 rounded-full blur-[40px] pointer-events-none transition-opacity duration-700"
         style={{ backgroundColor: t.accent, opacity: 0.06 }} />
 
       {/* Index */}
@@ -190,8 +182,8 @@ export const Testimonials = () => {
 
       {/* Parallax ambient */}
       <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-[#8b5cf6]/[0.03] rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-500/[0.02] rounded-full blur-[100px]" />
+        <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-[#8b5cf6]/[0.03] rounded-full blur-[50px]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-amber-500/[0.02] rounded-full blur-[40px]" />
       </motion.div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8">

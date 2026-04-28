@@ -31,4 +31,10 @@ export const authApi = {
     const { data } = await apiClient.get("/users/");
     return UserSchema.parse(data);
   },
+
+  // PATCH /users/  — update current user profile
+  updateMe: async (payload: Partial<Pick<User, "name" | "email">>): Promise<User> => {
+    const { data } = await apiClient.patch("/users/", payload);
+    return UserSchema.parse(data);
+  },
 };

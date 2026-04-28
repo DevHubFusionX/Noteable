@@ -41,15 +41,21 @@ export const VoiceModal = ({ open, onClose }: VoiceModalProps) => {
     setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const mimeType = MediaRecorder.isTypeSupported("audio/mp4")
+        ? "audio/mp4"
+        : MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : "audio/webm";
+      const recorder = new MediaRecorder(stream, { mimeType });
       chunksRef.current = [];
       recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       recorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop());
         setPhase("processing");
         try {
-          const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-          const file = new File([blob], "recording.webm", { type: "audio/webm" });
+          const ext  = mimeType.includes("mp4") ? "mp4" : "webm";
+          const blob = new Blob(chunksRef.current, { type: mimeType });
+          const file = new File([blob], `recording.${ext}`, { type: mimeType });
           const { result } = await notesApi.transcribeAudio(file);
           setTranscript(result);
           setPhase("done");

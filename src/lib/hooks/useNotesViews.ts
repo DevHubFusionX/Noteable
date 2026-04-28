@@ -25,7 +25,7 @@ export const useDeleteNotes = () => {
     mutationFn: (ids: string[]) => notesApi.deleteNotes(ids),
     onSuccess: (_, ids) => {
       ids.forEach(id => qc.removeQueries({ queryKey: queryKeys.notes.detail(id) }));
-      qc.invalidateQueries({ queryKey: queryKeys.notes.all() });
+      qc.invalidateQueries({ queryKey: ["notes"], exact: false });
       showToast(
         ids.length === 1 ? "Note deleted" : `${ids.length} notes deleted`,
         "info",

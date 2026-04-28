@@ -13,7 +13,7 @@ export const useCreateNote = () => {
   return useMutation({
     mutationFn: (payload: CreateNotePayload) => notesApi.create(payload),
     onSuccess: (note) => {
-      qc.invalidateQueries({ queryKey: queryKeys.notes.all() });
+      qc.invalidateQueries({ queryKey: ["notes"], exact: false });
       setActiveNote(note);
       showToast("Note created", "success");
     },
@@ -30,7 +30,7 @@ export const useUpdateNote = () => {
       notesApi.update(id, payload),
     onSuccess: (note) => {
       qc.setQueryData(queryKeys.notes.detail(note.id), note);
-      qc.invalidateQueries({ queryKey: queryKeys.notes.all() });
+      qc.invalidateQueries({ queryKey: ["notes"], exact: false });
     },
     onError: (err: Error) => showToast(err.message, "error"),
   });

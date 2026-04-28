@@ -6,13 +6,13 @@ import { AuthModal } from "./AuthModal";
 
 const RuledLines = () => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden">
-    {[...Array(18)].map((_, i) => (
+    {[...Array(8)].map((_, i) => (
       <motion.div
         key={i}
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ duration: 2, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
-        style={{ top: `${i * 60 + 60}px`, originX: 0 }}
+        style={{ top: `${i * 100 + 60}px`, originX: 0 }}
         className="absolute left-0 right-0 h-px bg-slate-900/[0.04]"
       />
     ))}
@@ -38,8 +38,8 @@ const CursorGlow = () => {
   }, [x, y]);
   return (
     <motion.div
-      className="absolute w-[700px] h-[700px] rounded-full bg-main/[0.04] blur-[140px] pointer-events-none z-0"
-      style={{ left: useTransform(sx, v => v - 350), top: useTransform(sy, v => v - 350) }}
+      className="absolute w-[400px] h-[400px] rounded-full bg-main/[0.04] blur-[60px] pointer-events-none z-0"
+      style={{ left: useTransform(sx, v => v - 200), top: useTransform(sy, v => v - 200), willChange: "transform" }}
     />
   );
 };

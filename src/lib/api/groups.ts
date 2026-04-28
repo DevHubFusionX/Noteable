@@ -34,4 +34,9 @@ export const groupsApi = {
     const { data } = await apiClient.patch(`/groups/${id}`, payload);
     return GroupSchema.parse(data);
   },
+
+  // DELETE /groups/:id
+  delete: async (id: string): Promise<void> => {
+    await apiClient.delete(`/groups/${id}`);
+  },
 };

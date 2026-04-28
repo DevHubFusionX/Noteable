@@ -10,6 +10,7 @@ import {
   Archive, Pin,
 } from "lucide-react";
 import { useGroups } from "@/lib/hooks";
+import { useUiStore } from "@/lib/stores/uiStore";
 
 const NAV_MAIN = [
   { id: "notes",   label: "All Notes",  icon: FileText,  badge: null },
@@ -47,11 +48,18 @@ const CollapseLabel = ({ children }: { children: React.ReactNode }) => (
   </motion.span>
 );
 
-const NavItem = ({ item, isActive, collapsed, onClick }: {
+const FLASH_COLORS: Record<string, string> = {
+  trash:   "rgba(239,68,68,0.7)",
+  archive: "rgba(251,191,36,0.7)",
+  pinned:  "rgba(139,92,246,0.7)",
+};
+
+const NavItem = ({ item, isActive, collapsed, onClick, flash }: {
   item: { id: string; label: string; icon: React.ElementType; badge: string | null };
-  isActive: boolean; collapsed: boolean; onClick: () => void;
+  isActive: boolean; collapsed: boolean; onClick: () => void; flash?: boolean;
 }) => {
-  const Icon = item.icon;
+  const Icon  = item.icon;
+  const color = FLASH_COLORS[item.id] ?? "rgba(139,92,246,0.7)";
   return (
     <motion.button onClick={onClick} whileHover={{ x: collapsed ? 0 : 2 }}
       className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${collapsed ? "justify-center" : ""}`}
@@ -68,7 +76,51 @@ const NavItem = ({ item, isActive, collapsed, onClick }: {
       {isActive && !collapsed && (
         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.9)]" />
       )}
-      <Icon className="relative z-10 w-[15px] h-[15px] shrink-0" strokeWidth={isActive ? 2.2 : 1.8} />
+
+      {/* Icon wrapper with liquid drop animation */}
+      <div className="relative z-10 shrink-0">
+        {/* Ripple drop */}
+        <AnimatePresence>
+          {flash && (
+            <motion.div
+              key="drop"
+              initial={{ scale: 0, opacity: 0.9 }}
+              animate={{ scale: 2.8, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{ background: color, filter: "blur(2px)" }}
+            />
+          )}
+        </AnimatePresence>
+        {/* Splat drops */}
+        <AnimatePresence>
+          {flash && [0, 60, 120, 180, 240, 300].map((deg, i) => (
+            <motion.div
+              key={`splat-${deg}`}
+              initial={{ x: 0, y: 0, scale: 1, opacity: 0.9 }}
+              animate={{
+                x: Math.cos((deg * Math.PI) / 180) * 10,
+                y: Math.sin((deg * Math.PI) / 180) * 10,
+                scale: 0,
+                opacity: 0,
+              }}
+              transition={{ duration: 0.45, delay: i * 0.02, ease: "easeOut" }}
+              className="absolute w-1.5 h-1.5 rounded-full pointer-events-none"
+              style={{ background: color, top: "50%", left: "50%", marginTop: "-3px", marginLeft: "-3px" }}
+            />
+          ))}
+        </AnimatePresence>
+        <motion.div
+          animate={flash ? { scale: [1, 1.5, 0.85, 1.15, 1], rotate: [0, -12, 8, -4, 0] } : {}}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        >
+          <Icon className="w-[15px] h-[15px]" strokeWidth={isActive ? 2.2 : 1.8}
+            style={{ color: flash ? color : undefined, filter: flash ? `drop-shadow(0 0 4px ${color})` : undefined }}
+          />
+        </motion.div>
+      </div>
+
       <AnimatePresence>
         {!collapsed && (
           <CollapseLabel>
@@ -89,12 +141,21 @@ export const Sidebar = ({ active, setActive, collapsed, setCollapsed }: SidebarP
   const [groupsOpen, setGroupsOpen] = useState(true);
   const router = useRouter();
   const { data: groups = [] } = useGroups();
+  const { sidebarFlash } = useUiStore();
+
+  const flashMap: Record<string, string> = {
+    trash:   "trash",
+    archive: "archive",
+    pinned:  "pinned",
+  };
 
   const handleNav = (id: string) => {
     setActive(id);
     if (id === "buddy")   router.push("/dashboard/buddy");
     else if (id === "pinned")  router.push("/dashboard?view=pinned");
     else if (id === "archive") router.push("/dashboard?view=archive");
+    else if (id === "trash")   router.push("/dashboard/trash");
+    else if (id === "groups")  router.push("/dashboard/groups");
     else router.push("/dashboard");
   };
 
@@ -171,7 +232,9 @@ export const Sidebar = ({ active, setActive, collapsed, setCollapsed }: SidebarP
             )}
           </AnimatePresence>
           {NAV_ORGANIZE.map(item => (
-            <NavItem key={item.id} item={item} isActive={active === item.id} collapsed={collapsed} onClick={() => handleNav(item.id)} />
+            <NavItem key={item.id} item={item} isActive={active === item.id} collapsed={collapsed}
+              flash={sidebarFlash === flashMap[item.id]}
+              onClick={() => handleNav(item.id)} />
           ))}
         </div>
 

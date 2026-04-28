@@ -26,7 +26,7 @@ export const useCreateGroup = () => {
   return useMutation({
     mutationFn: (payload: CreateGroupPayload) => groupsApi.create(payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.groups.all() });
+      qc.invalidateQueries({ queryKey: ["groups"], exact: false });
       showToast("Group created", "success");
     },
     onError: (err: Error) => showToast(err.message, "error"),
@@ -42,8 +42,24 @@ export const useUpdateGroup = () => {
       groupsApi.update(id, payload),
     onSuccess: (group) => {
       qc.setQueryData(queryKeys.groups.detail(group.id), group);
-      qc.invalidateQueries({ queryKey: queryKeys.groups.all() });
+      qc.invalidateQueries({ queryKey: ["groups"], exact: false });
       showToast("Group updated", "success");
+    },
+    onError: (err: Error) => showToast(err.message, "error"),
+  });
+};
+
+export const useDeleteGroup = () => {
+  const qc            = useQueryClient();
+  const { showToast } = useUiStore();
+
+  return useMutation({
+    mutationFn: (id: string) => groupsApi.delete(id),
+    onSuccess: (_, id) => {
+      qc.removeQueries({ queryKey: queryKeys.groups.detail(id) });
+      qc.invalidateQueries({ queryKey: ["groups"], exact: false });
+      qc.invalidateQueries({ queryKey: ["notes"], exact: false });
+      showToast("Group deleted", "info");
     },
     onError: (err: Error) => showToast(err.message, "error"),
   });

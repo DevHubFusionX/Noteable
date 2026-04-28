@@ -13,16 +13,21 @@ export const useTrash = (params: FetchTrashParams = {}) =>
 
 export const useMoveToTrash = () => {
   const qc = useQueryClient();
-  const { showToast } = useUiStore();
-  const { setOptimisticDelete, rollbackDelete } = useNotesStore();
+  const { showToast, flashSidebar } = useUiStore();
+  const { setOptimisticDelete, rollbackDelete, rollbackPin } = useNotesStore();
 
   return useMutation({
     mutationFn: (ids: string[]) => notesApi.moveToTrash(ids),
-    onMutate: (ids) => ids.forEach(id => setOptimisticDelete(id)),
+    onMutate: (ids) => {
+      ids.forEach(id => {
+        setOptimisticDelete(id);
+        rollbackPin(id);
+      });
+      flashSidebar("trash");
+    },
     onSuccess: (_, ids) => {
       ids.forEach(id => qc.removeQueries({ queryKey: queryKeys.notes.detail(id) }));
-      qc.invalidateQueries({ queryKey: queryKeys.notes.all() });
-      qc.invalidateQueries({ queryKey: queryKeys.notes.trash() });
+      qc.invalidateQueries({ queryKey: ["notes"], exact: false });
       showToast(
         ids.length === 1 ? "Note moved to trash" : `${ids.length} notes moved to trash`,
         "info",

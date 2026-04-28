@@ -17,6 +17,7 @@ interface AuthState {
   register:   (payload: RegisterPayload) => Promise<void>;
   logout:     ()                         => Promise<void>;
   fetchMe:    ()                         => Promise<void>;
+  updateMe:   (payload: Partial<Pick<User, "name" | "email">>) => Promise<void>;
   clearError: ()                         => void;
   _hasHydrated: boolean;
   setHasHydrated: (val: boolean)         => void;
@@ -96,6 +97,18 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           clearTokens();
           set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false, isLoading: false });
+        }
+      },
+
+      updateMe: async (payload) => {
+        set({ isLoading: true, error: null });
+        try {
+          const user = await authApi.updateMe(payload);
+          set({ user, isLoading: false });
+        } catch (err) {
+          const msg = err instanceof ApiClientError ? err.message : "Update failed";
+          set({ error: msg, isLoading: false });
+          throw err;
         }
       },
 

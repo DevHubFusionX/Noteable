@@ -24,10 +24,10 @@ export const SummarizerPanel = ({ open, onClose }: SummarizerPanelProps) => {
   const effectiveId   = selectedId ?? notes[0]?.id ?? null;
   const selectedNote  = notes.find(n => n.id === effectiveId) ?? null;
 
-  const { data: summary, isFetching, refetch } = useSummarize(effectiveId);
+  const { data: summary, isFetching, isError, error, refetch } = useSummarize(effectiveId);
 
-  const phase: "idle" | "loading" | "done" =
-    isFetching ? "loading" : summary ? "done" : "idle";
+  const phase: "idle" | "loading" | "done" | "error" =
+    isFetching ? "loading" : isError ? "error" : summary ? "done" : "idle";
 
   const handleClose = () => {
     onClose();
@@ -147,6 +147,16 @@ export const SummarizerPanel = ({ open, onClose }: SummarizerPanelProps) => {
 
               {/* Result */}
               <AnimatePresence mode="wait">
+                {phase === "error" && (
+                  <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="flex flex-col gap-2 p-4 rounded-xl"
+                    style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}>
+                    <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-red-400">Failed to summarise</p>
+                    <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
+                      {(error as Error)?.message ?? "Something went wrong. Try again."}
+                    </p>
+                  </motion.div>
+                )}
                 {phase === "loading" && (
                   <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-3">
                     <p className="text-[9px] font-mono uppercase tracking-[0.22em]" style={{ color: "var(--text-4)" }}>Analysing…</p>
@@ -194,7 +204,7 @@ export const SummarizerPanel = ({ open, onClose }: SummarizerPanelProps) => {
                   whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }}
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500 text-black text-[12px] font-black uppercase tracking-widest shadow-[0_4px_14px_rgba(245,158,11,0.35)] disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                   <Zap className="w-3.5 h-3.5" />
-                  {phase === "loading" ? "Summarising…" : "Summarise Note"}
+                  {phase === "loading" ? "Summarising…" : phase === "error" ? "Retry" : "Summarise Note"}
                 </motion.button>
               ) : (
                 <motion.button

@@ -36,8 +36,8 @@ export const FinalCTA = () => {
     <section className="relative w-full overflow-hidden py-24 md:py-36">
 
       {/* Ambient glow */}
-      <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-[600px] h-[600px] bg-main/8 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-blue-400/5 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-[600px] h-[600px] bg-main/8 rounded-full blur-[50px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-blue-400/5 rounded-full blur-[40px] pointer-events-none" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 

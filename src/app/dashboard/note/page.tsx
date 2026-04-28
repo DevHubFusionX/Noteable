@@ -4,12 +4,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import { marked } from "marked";
 import {
   ArrowLeft, Bold, Italic, List, ListOrdered,
   Hash, FolderOpen, Clock, Sparkles, Mic,
-  Check, ChevronDown, Type, Quote, Trash2
+  Check, ChevronDown, Type, Quote, Trash2, Archive
 } from "lucide-react";
-import { useGroups, useCreateNote, useNote, useUpdateNote } from "@/lib/hooks";
+import { useGroups, useCreateNote, useNote, useUpdateNote, useMoveToTrash, useToggleArchive } from "@/lib/hooks";
 import { Group, Note } from "@/lib/api/types";
 
 const NO_GROUP: Group = { id: "none", name: "No group", color: "var(--text-4)" };
@@ -39,6 +40,7 @@ const TOOLBAR: { icon: React.ElementType; label: string; key: string }[][] = [
     { icon: ListOrdered, label: "Numbered list", key: "ol"      },
   ],
 ];
+
 
 // ── Toolbar button ─────────────────────────────────────────────────────────
 const ToolBtn = ({ icon: Icon, label, active = false, onClick }: {
@@ -124,7 +126,7 @@ const VoiceToggle = ({ onTranscript, onInterim }: { onTranscript: (text: string)
   if (!mounted || !browserSupportsSpeechRecognition) return null;
 
   return (
-    <div className="relative hidden sm:flex items-center">
+    <div className="relative flex items-center">
       {/* Live text bubble */}
       <AnimatePresence>
         {listening && (
@@ -201,8 +203,10 @@ function NoteEditorContent() {
   const { data: apiGroups = [] } = useGroups();
   const groups = [NO_GROUP, ...apiGroups];
   
-  const createNote = useCreateNote();
-  const updateNote = useUpdateNote();
+  const createNote   = useCreateNote();
+  const updateNote   = useUpdateNote();
+  const moveToTrash  = useMoveToTrash();
+  const toggleArchive = useToggleArchive();
   const { data: existingNote, isLoading: loadingNote } = useNote(noteId);
 
   const [title, setTitle]     = useState("");
@@ -213,15 +217,19 @@ function NoteEditorContent() {
   const [tagInput, setTagInput] = useState("");
   const [saved, setSaved] = useState(true);
   const [wordCount, setWordCount] = useState(0);
-  const [activeFormats, setActiveFormats] = useState<string[]>([]);
   const [interim, setInterim] = useState("");
 
   const initialized = useRef(false);
+  const contentRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (existingNote && !initialized.current) {
       setTitle(existingNote.title);
       setContent(existingNote.content);
+      lastSavedTitle.current   = existingNote.title;
+      lastSavedContent.current = existingNote.content;
+      if (contentRef.current)
+        contentRef.current.innerHTML = existingNote.content;
       if (existingNote.groupId) {
         const g = groups.find(x => x.id === existingNote.groupId);
         if (g) setGroup(g);
@@ -233,7 +241,11 @@ function NoteEditorContent() {
   }, [existingNote, groups]);
 
   const handleTranscript = (text: string) => {
-    setContent(prev => prev ? prev + " " + text : text);
+    if (contentRef.current) {
+      contentRef.current.focus();
+      document.execCommand("insertText", false, (content ? " " : "") + text);
+      setContent(contentRef.current.innerText);
+    }
     setInterim("");
   };
 
@@ -241,25 +253,39 @@ function NoteEditorContent() {
     setInterim(text);
   };
 
+  // Extract plain markdown from the contentEditable div's innerText
+  const handleContentInput = () => {
+    if (!contentRef.current) return;
+    // Just store the raw text for saving — don't re-render HTML on every keystroke
+    setContent(contentRef.current.innerText);
+  };
+
+  const lastSavedContent = useRef("");
+  const lastSavedTitle   = useRef("");
+
   useEffect(() => {
-    if (!title && !content) return;
+    if (!noteId) return;                          // new notes: manual save only
+    if (!title.trim() && !content) return;        // nothing to save
+    const unchanged =
+      title.trim() === lastSavedTitle.current &&
+      (contentRef.current?.innerHTML ?? content) === lastSavedContent.current;
+    if (unchanged) return;
+
     setSaved(false);
     const t = setTimeout(() => {
-      setSaved(true);
-      // Auto-save if editing
-      if (noteId && title.trim()) {
-        updateNote.mutate({
-          id: noteId,
-          payload: {
-            title: title.trim(),
-            content,
-            groupId: group.id === "none" ? undefined : group.id,
+      const savedContent = contentRef.current?.innerHTML ?? content;
+      updateNote.mutate(
+        { id: noteId, payload: { title: title.trim(), content: savedContent, groupId: group.id === "none" ? undefined : group.id } },
+        { onSuccess: () => {
+            lastSavedTitle.current   = title.trim();
+            lastSavedContent.current = savedContent;
+            setSaved(true);
           }
-        });
-      }
-    }, 1500);
+        }
+      );
+    }, 2000);
     return () => clearTimeout(t);
-  }, [title, content, group.id, noteId, updateNote.mutate]);
+  }, [title, content, group.id, noteId]);
 
   useEffect(() => {
     setWordCount(content.trim().split(/\s+/).filter(Boolean).length);
@@ -281,34 +307,35 @@ function NoteEditorContent() {
 
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
-  const toggleFormat = (key: string) =>
-    setActiveFormats(f => f.includes(key) ? f.filter(x => x !== key) : [...f, key]);
+  const handleFormat = (key: string) => {
+    if (!contentRef.current) return;
+    contentRef.current.focus();
+
+    switch (key) {
+      case "bold":    document.execCommand("bold");                    break;
+      case "italic":  document.execCommand("italic");                  break;
+      case "heading": document.execCommand("formatBlock", false, "h2"); break;
+      case "quote":   document.execCommand("formatBlock", false, "blockquote"); break;
+      case "ul":      document.execCommand("insertUnorderedList");     break;
+      case "ol":      document.execCommand("insertOrderedList");       break;
+    }
+    setContent(contentRef.current.innerHTML);
+  };
 
   const handleSave = () => {
     if (!title.trim()) return;
+    const savedContent = contentRef.current?.innerHTML ?? content;
     const payload = {
       title:      title.trim(),
-      content,
+      content:    savedContent,
       isPinned:   false,
       isArchived: false,
       groupId:    group.id === "none" ? undefined : group.id,
     };
-    console.log("Saving note with payload:", payload);
-    
     if (noteId) {
-      updateNote.mutate({ id: noteId, payload }, {
-        onSuccess: () => {
-          console.log("Note update successful, redirecting...");
-          router.push("/dashboard");
-        }
-      });
+      updateNote.mutate({ id: noteId, payload }, { onSuccess: () => router.push("/dashboard") });
     } else {
-      createNote.mutate(payload, { 
-        onSuccess: () => {
-          console.log("Note save successful, redirecting...");
-          router.push("/dashboard");
-        }
-      });
+      createNote.mutate(payload, { onSuccess: () => router.push("/dashboard") });
     }
   };
 
@@ -329,11 +356,13 @@ function NoteEditorContent() {
       </div>
 
       {/* Top bar */}
-      <div className="relative z-20 shrink-0 px-4 h-14 flex items-center gap-3"
+      <div className="relative z-20 shrink-0 px-3 h-14 flex items-center gap-2"
         style={{ borderBottom: "1px solid var(--border)" }}>
-        <Glass className="flex items-center gap-3 px-3 py-1.5 rounded-2xl">
+
+        {/* Back + save */}
+        <Glass className="flex items-center gap-2.5 px-3 py-1.5 rounded-2xl">
           <motion.button onClick={() => router.back()} whileHover={{ x: -2 }} whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 text-[12px] font-medium" style={{ color: "var(--text-3)" }}>
+            className="flex items-center gap-1.5 text-[12px] font-medium" style={{ color: "var(--text-3)" }}>
             <ArrowLeft className="w-3.5 h-3.5" />
             <span className="hidden sm:block">Back</span>
           </motion.button>
@@ -343,23 +372,45 @@ function NoteEditorContent() {
 
         <div className="flex-1" />
 
+        {/* Archive + Trash — always visible */}
+        {noteId && (
+          <Glass className="flex items-center px-1.5 py-1.5 rounded-2xl gap-0.5">
+            <motion.button
+              onClick={() => toggleArchive.mutate({ id: noteId, isArchived: !existingNote?.isArchived }, { onSuccess: () => router.push("/dashboard") })}
+              whileTap={{ scale: 0.9 }} title={existingNote?.isArchived ? "Unarchive" : "Archive"}
+              className="w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+              style={{ color: existingNote?.isArchived ? "rgb(251,191,36)" : "var(--text-4)" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
+              <Archive className="w-3.5 h-3.5" />
+            </motion.button>
+            <motion.button
+              onClick={() => moveToTrash.mutate([noteId], { onSuccess: () => router.push("/dashboard") })}
+              whileTap={{ scale: 0.9 }} title="Move to trash"
+              className="w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+              style={{ color: "var(--text-4)" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; e.currentTarget.style.color = "rgb(248,113,113)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--text-4)"; }}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </motion.button>
+          </Glass>
+        )}
+
         {/* Group picker */}
         <div className="relative">
-          <Glass className="flex items-center gap-2 px-3 py-1.5 rounded-2xl">
+          <Glass className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl">
             <button onClick={() => setGroupOpen(!groupOpen)}
-              className="flex items-center gap-2 text-[12px] font-medium" style={{ color: "var(--text-2)" }}>
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: group.color }} />
-              {group.name}
-              <motion.div animate={{ rotate: groupOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                <ChevronDown className="w-3 h-3" style={{ color: "var(--text-4)" }} />
-              </motion.div>
+              className="flex items-center gap-1.5 text-[12px] font-medium" style={{ color: "var(--text-2)" }}>
+              <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: group.color }} />
+              <span className="hidden sm:block max-w-[80px] truncate">{group.name}</span>
+              <ChevronDown className="w-3 h-3" style={{ color: "var(--text-4)" }} />
             </button>
           </Glass>
           <AnimatePresence>
             {groupOpen && (
               <motion.div initial={{ opacity: 0, y: -6, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -6, scale: 0.97 }} transition={{ duration: 0.15 }}
-                className="absolute top-full right-0 mt-2 w-40 rounded-2xl overflow-hidden z-50"
+                className="absolute top-full right-0 mt-2 w-44 rounded-2xl overflow-hidden z-50"
                 style={{ background: "var(--bg-2)", border: "1px solid var(--border-2)", boxShadow: "0 16px 40px rgba(0,0,0,0.3)" }}>
                 {groups.map(g => (
                   <button key={g.id} onClick={() => { setGroup(g); setGroupOpen(false); }}
@@ -376,7 +427,7 @@ function NoteEditorContent() {
           </AnimatePresence>
         </div>
 
-        {/* Buddy */}
+        {/* Buddy — desktop only */}
         <Glass className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl cursor-pointer hover:opacity-80 transition-all">
           <button className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-violet-400">
             <Sparkles className="w-3 h-3" /> Buddy
@@ -388,17 +439,23 @@ function NoteEditorContent() {
       </div>
 
       {/* Toolbar */}
-      <div className="relative z-10 flex justify-center pt-4 px-4 shrink-0">
-        <Glass className="flex items-center gap-1 px-3 py-2 rounded-2xl">
+      <div className="relative z-10 flex justify-center pt-4 px-4 shrink-0 overflow-x-auto scrollbar-none">
+        <Glass className="flex items-center gap-1 px-3 py-2 rounded-2xl min-w-max">
           {TOOLBAR.map((group, gi) => (
             <React.Fragment key={gi}>
               {gi > 0 && <div className="w-px h-5 mx-1" style={{ background: "var(--border)" }} />}
-              {group.map(({ icon, label, key }) => (
-                <ToolBtn key={key} icon={icon} label={label}
-                  active={activeFormats.includes(key)}
-                  onClick={() => toggleFormat(key)}
-                />
-              ))}
+              {group.map(({ icon, label, key }) => {
+                const isActive =
+                  (key === "bold"   && typeof document !== "undefined" && document.queryCommandState("bold"))   ||
+                  (key === "italic" && typeof document !== "undefined" && document.queryCommandState("italic")) ||
+                  false;
+                return (
+                  <ToolBtn key={key} icon={icon} label={label}
+                    active={isActive}
+                    onClick={() => handleFormat(key)}
+                  />
+                );
+              })}
             </React.Fragment>
           ))}
           <div className="w-px h-5 mx-1" style={{ background: "var(--border)" }} />
@@ -432,17 +489,22 @@ function NoteEditorContent() {
 
       {/* Editor */}
       <div className="flex-1 overflow-y-auto scrollbar-none">
-        <div className="max-w-2xl mx-auto px-6 py-8 flex flex-col gap-4">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col gap-4">
           <textarea ref={titleRef} value={title} onChange={e => setTitle(e.target.value)}
             placeholder="Untitled" rows={1}
             className="w-full resize-none bg-transparent font-black tracking-tight leading-tight focus:outline-none overflow-hidden"
             style={{ fontSize: "clamp(28px, 4vw, 40px)", color: "var(--text-1)" }} />
           <div className="h-px" style={{ background: "var(--border)" }} />
           <div className="relative">
-            <textarea value={content} onChange={e => setContent(e.target.value)}
-              placeholder="Start writing… or press / for commands"
-              className="w-full resize-none bg-transparent leading-relaxed focus:outline-none min-h-[50vh]"
-              style={{ fontSize: "var(--fs-body, 15px)", color: "var(--text-2)", fontFamily: "Mulish, sans-serif" }} />
+            <div
+              ref={contentRef as any}
+              contentEditable
+              suppressContentEditableWarning
+              onInput={handleContentInput}
+              data-placeholder="Start writing…"
+              className="min-h-[50vh] leading-relaxed focus:outline-none note-editor"
+              style={{ fontSize: "var(--fs-body, 15px)", color: "var(--text-2)", fontFamily: "Mulish, sans-serif" }}
+            />
             {interim && (
               <p className="text-[15px] leading-relaxed font-mono mt-1" style={{ color: "var(--text-4)", fontStyle: "italic" }}>
                 {interim}
@@ -453,27 +515,31 @@ function NoteEditorContent() {
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 shrink-0 px-4 py-2 flex items-center justify-between"
+      <div className="relative z-10 shrink-0 px-3 sm:px-4 h-14 flex items-center justify-between gap-3"
         style={{ borderTop: "1px solid var(--border)" }}>
-        <Glass className="flex items-center gap-4 px-4 py-2 rounded-2xl">
-          <div className="flex items-center gap-1.5 text-[11px] font-mono" style={{ color: "var(--text-4)" }}>
-            <Type className="w-3 h-3" /><span>{wordCount} words</span>
+        <div className="flex items-center gap-3 text-[11px] font-mono" style={{ color: "var(--text-4)" }}>
+          <div className="flex items-center gap-1.5">
+            <Type className="w-3 h-3" />
+            <span>{wordCount} <span className="hidden sm:inline">words</span></span>
           </div>
           <div className="w-px h-3" style={{ background: "var(--border)" }} />
-          <div className="flex items-center gap-1.5 text-[11px] font-mono" style={{ color: "var(--text-4)" }}>
-            <Clock className="w-3 h-3" /><span>{readingTime} min read</span>
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-3 h-3" />
+            <span>{readingTime} <span className="hidden sm:inline">min</span></span>
           </div>
-          <div className="w-px h-3" style={{ background: "var(--border)" }} />
-          <div className="flex items-center gap-1.5 text-[11px] font-mono" style={{ color: "var(--text-4)" }}>
-            <FolderOpen className="w-3 h-3" /><span>{group.name}</span>
+          <div className="hidden sm:block w-px h-3" style={{ background: "var(--border)" }} />
+          <div className="hidden sm:flex items-center gap-1.5">
+            <FolderOpen className="w-3 h-3" />
+            <span className="max-w-[120px] truncate">{group.name}</span>
           </div>
-        </Glass>
+        </div>
         <motion.button
           onClick={handleSave}
           disabled={!title.trim() || createNote.isPending || updateNote.isPending}
           whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }}
-          className="flex items-center gap-2 px-5 py-2 rounded-2xl text-[12px] font-black uppercase tracking-widest text-white bg-violet-600 shadow-[0_4px_14px_rgba(139,92,246,0.4)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.55)] disabled:opacity-50 transition-all">
-          <Check className="w-3.5 h-3.5" /> {noteId ? "Update Note" : "Save Note"}
+          className="flex items-center gap-2 px-4 sm:px-5 py-2 rounded-2xl text-[12px] font-black uppercase tracking-widest text-white bg-violet-600 shadow-[0_4px_14px_rgba(139,92,246,0.4)] disabled:opacity-50 transition-all shrink-0">
+          <Check className="w-3.5 h-3.5" />
+          <span>{noteId ? "Update" : "Save"}</span>
         </motion.button>
       </div>
     </div>
